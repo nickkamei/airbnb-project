@@ -114,10 +114,14 @@
     const forms = document.querySelectorAll('.needs-validation');
     Array.from(forms).forEach(form => {
         form.addEventListener('submit', async (event) => {
+            console.log("Form submission attempted");
             if (!form.checkValidity()) {
                 event.preventDefault();
                 event.stopPropagation();
                 form.classList.add('was-validated');
+                console.log("Form validation failed");
+            } else {
+                console.log("Form validation passed");
             }
         });
     });
