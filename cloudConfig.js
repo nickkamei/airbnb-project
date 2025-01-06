@@ -19,3 +19,6 @@ const storage = new CloudinaryStorage({
     cloudinary,
     storage
   }
+
+
+console.log('Cloudinary config:', cloudinary.config());
