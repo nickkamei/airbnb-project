@@ -117,3 +117,19 @@
         </form>
     </div>
 </div>
+
+<script>
+document.querySelector('form').addEventListener('submit', function(e) {
+    // Prevent the form from submitting immediately
+    e.preventDefault();
+    
+    // Log the form data
+    const formData = new FormData(this);
+    for (let [key, value] of formData.entries()) {
+        console.log(key + ': ' + value);
+    }
+    
+    // Now submit the form
+    this.submit();
+});
+</script>
