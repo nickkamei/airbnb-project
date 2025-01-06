@@ -114,3 +114,21 @@ app.use((err, req, res, next) => {
 app.listen(8080, ()=>{
     console.log("server is listening to port 8080");
 });
+
+app.use((err, req, res, next) => {
+    console.error("ERROR:", err);
+    
+    // Handle Joi validation errors
+    if (err.name === "ValidationError") {
+        req.flash("error", err.message);
+        return res.redirect("/listings/new");
+    }
+    
+    // Handle Multer errors
+    if (err.name === "MulterError") {
+        req.flash("error", "Error uploading file: " + err.message);
+        return res.redirect("/listings/new");
+    }
+    
+    next(err);
+});
