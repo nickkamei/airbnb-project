@@ -2,90 +2,108 @@
 <div class="row mt-3">
     <div class="col-8 offset-2">
         <h3>Create a New Listing</h3>
-         <form action="/listings" method="POST" novalidate class="needs-validation" enctype="multipart/form-data">
-    <div class="mb-3">
-        <label for="title" class="form-label">Title</label>
-        <input
-            type="text"
-            id="title"
-            name="listing[title]"
-            class="form-control"
-            placeholder="Add a catchy title"
-            required
-        >
-    </div>
-    <div class="mb-3">
-        <label for="description" class="form-label">Description</label>
-        <textarea
-            id="description"
-            name="listing[description]"
-            class="form-control"
-            required
-        ></textarea>
-    </div>
-    <div class="mb-3">
-        <label for="image" class="form-label">Upload Image</label>
-        <input
-            type="file"
-            id="image"
-            name="image"
-            class="form-control"
-            required
-        >
-    </div>
-    <div class="row">
-        <div class="mb-3 col-md-4">
-            <label for="price" class="form-label">Price</label>
-            <input
-                type="number"
-                id="price"
-                name="listing[price]"
-                class="form-control"
-                placeholder="1200"
-                required
-            >
-        </div>
-        <div class="mb-3 col-md-8">
-            <label for="country" class="form-label">Country</label>
-            <input
-                type="text"
-                id="country"
-                name="listing[country]"
-                class="form-control"
-                placeholder="India"
-                required
-            >
-        </div>
-    </div>
-    <div class="mb-3">
-        <label for="location" class="form-label">Location</label>
-        <input
-            type="text"
-            id="location"
-            name="listing[location]"
-            class="form-control"
-            placeholder="Dimapur, Nagaland"
-            required
-        >
-    </div>
-    <button class="btn btn-dark add-btn mt-3">Add Listing</button>
-</form>
 
+        <!-- Flash messages -->
+        <% if (error) { %>
+            <div class="alert alert-danger"><%= error %></div>
+        <% } %>
+        <% if (success) { %>
+            <div class="alert alert-success"><%= success %></div>
+        <% } %>
+
+        <form
+            action="/listings"
+            method="POST"
+            novalidate
+            class="needs-validation"
+            enctype="multipart/form-data"
+        >
+            <div class="mb-3">
+                <label for="title" class="form-label">Title</label>
+                <input
+                    type="text"
+                    id="title"
+                    name="listing[title]"
+                    class="form-control"
+                    placeholder="Add a catchy title"
+                    required
+                />
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <textarea
+                    id="description"
+                    name="listing[description]"
+                    class="form-control"
+                    required
+                ></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="image" class="form-label">Upload Image</label>
+                <input
+                    type="file"
+                    id="image"
+                    name="image"
+                    class="form-control"
+                    required
+                />
+            </div>
+            <div class="row">
+                <div class="mb-3 col-md-4">
+                    <label for="price" class="form-label">Price</label>
+                    <input
+                        type="number"
+                        id="price"
+                        name="listing[price]"
+                        class="form-control"
+                        placeholder="1200"
+                        required
+                    />
+                </div>
+                <div class="mb-3 col-md-8">
+                    <label for="country" class="form-label">Country</label>
+                    <input
+                        type="text"
+                        id="country"
+                        name="listing[country]"
+                        class="form-control"
+                        placeholder="India"
+                        required
+                    />
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="location" class="form-label">Location</label>
+                <input
+                    type="text"
+                    id="location"
+                    name="listing[location]"
+                    class="form-control"
+                    placeholder="Dimapur, Nagaland"
+                    required
+                />
+            </div>
+            <button class="btn btn-dark add-btn mt-3">Add Listing</button>
+        </form>
     </div>
 </div>
 
 <script>
-(() => {
-    'use strict'
-    const forms = document.querySelectorAll('.needs-validation')
-    Array.from(forms).forEach(form => {
-        form.addEventListener('submit', event => {
-            if (!form.checkValidity()) {
-                event.preventDefault()
-                event.stopPropagation()
-            }
-            form.classList.add('was-validated')
-        }, false)
-    })
-})()
+    (() => {
+        "use strict";
+        const forms = document.querySelectorAll(".needs-validation");
+        Array.from(forms).forEach((form) => {
+            form.addEventListener(
+                "submit",
+                (event) => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add("was-validated");
+                },
+                false
+            );
+        });
+    })();
 </script>
