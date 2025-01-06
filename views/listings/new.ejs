@@ -12,14 +12,14 @@
             
             <div class="mb-3">
                 <label for="title" class="form-label">Title</label>
-                <input 
-                    type="text"
-                    id="title"
-                    name="listing[title]"
-                    class="form-control"
-                    placeholder="Add a catchy title"
-                    required
-                >
+<input 
+    type="file"
+    id="image"
+    name="image"  <!-- This should match the upload.single("image") -->
+    class="form-control"
+    required
+>
+
                 <div class="invalid-feedback">
                     Title is required
                 </div>
