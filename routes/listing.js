@@ -7,21 +7,31 @@ const ExpressError = require("../utils/ExpressError.js");
 const {listingSchema} = require("../schema.js");
 const listingController = require("../controllers/listings.js");
 const multer  = require('multer');
-
 const {storage} = require("../cloudConfig.js");
 const upload = multer({storage});
 
 router.route("/")
-.get(wrapAsync(listingController.index))
-.post(isLoggedIn, upload.single("listing[image]"), validateListing, wrapAsync(listingController.createListing));
+    .get(wrapAsync(listingController.index))
+    .post(
+        isLoggedIn, 
+        upload.single("image"),  // Changed from "listing[image]" to "image"
+        validateListing, 
+        wrapAsync(listingController.createListing)
+    );
 
 //new route
 router.get("/new", isLoggedIn, listingController.renderNewForm);
 
 router.route("/:id")
-.get(wrapAsync(listingController.showListing))
-.put(isLoggedIn, isOwner, upload.single("listing[image]"), validateListing, wrapAsync(listingController.updateListing))
-.delete( isLoggedIn, isOwner, wrapAsync(listingController.destroyListing));
+    .get(wrapAsync(listingController.showListing))
+    .put(
+        isLoggedIn, 
+        isOwner, 
+        upload.single("image"),  // Changed here too
+        validateListing, 
+        wrapAsync(listingController.updateListing)
+    )
+    .delete(isLoggedIn, isOwner, wrapAsync(listingController.destroyListing));
 
 //edit route
 router.get("/:id/edit", isLoggedIn, isOwner, wrapAsync(listingController.renderEditForm));
