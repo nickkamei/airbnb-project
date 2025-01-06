@@ -37,38 +37,47 @@ module.exports.showListing = async (req, res) => {
 
 module.exports.createListing = async (req, res, next) => {
     try {
+        console.log("Creating listing - Request body:", req.body);
+        console.log("File upload:", req.file);
+
         // Check if file exists
         if (!req.file) {
+            console.log("No file uploaded");
             req.flash("error", "Please upload an image");
             return res.redirect("/listings/new");
         }
 
-        // Geocode the location
+        // Log geocoding attempt
+        console.log("Attempting geocoding for:", req.body.listing.location);
         let response = await geocodingClient.forwardGeocode({
             query: req.body.listing.location,
             limit: 1
         }).send();
+
+        console.log("Geocoding response:", response.body);
+
+        if (!response.body.features || !response.body.features[0]) {
+            console.log("No geocoding results found");
+            req.flash("error", "Location not found");
+            return res.redirect("/listings/new");
+        }
 
         let url = req.file.path;
         let filename = req.file.filename;
         const newListing = new Listing(req.body.listing);
         newListing.owner = req.user._id;
         newListing.image = {url, filename};
-        
-        // Add error check for geocoding response
-        if (!response.body.features[0]) {
-            req.flash("error", "Location not found");
-            return res.redirect("/listings/new");
-        }
         newListing.geometry = response.body.features[0].geometry;
         
+        console.log("About to save listing:", newListing);
         let savedListing = await newListing.save();
-        console.log(savedListing);
+        console.log("Listing saved:", savedListing);
+
         req.flash("success", "New Listing Created!");
         res.redirect("/listings");
     } catch (error) {
         console.error("Error creating listing:", error);
-        req.flash("error", "Error creating listing");
+        req.flash("error", error.message || "Error creating listing");
         return res.redirect("/listings/new");
     }
 };
