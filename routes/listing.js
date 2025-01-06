@@ -9,6 +9,7 @@ const listingController = require("../controllers/listings.js");
 const multer  = require('multer');
 const {storage} = require("../cloudConfig.js");
 const upload = multer({storage});
+const { wrapAsync } = require("../utils/wrapAsync.js");
 
 const wrapAsync = (fn) => {
     return function (req, res, next) {
