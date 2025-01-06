@@ -22,7 +22,6 @@ module.exports.createListing = async (req, res, next) => {
 // Show details of a specific listing
 module.exports.showListing = async (req, res) => {
     const { id } = req.params;
-    // Populate both the owner and the review authors
     const listing = await Listing.findById(id)
         .populate({
             path: "owner",
@@ -31,11 +30,10 @@ module.exports.showListing = async (req, res) => {
         .populate({
             path: "reviews",
             populate: {
-                path: "author",
-                select: "username"
+                path: "author"
             }
         });
-
+    
     if (!listing) {
         req.flash("error", "Listing not found!");
         return res.redirect("/listings");
