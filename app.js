@@ -132,3 +132,7 @@ app.use((err, req, res, next) => {
     
     next(err);
 });
+
+mongoose.connection.on('error', err => {
+    console.log('MongoDB connection error:', err);
+});
