@@ -1,17 +1,15 @@
 <% layout("/layouts/boilerplate") %>
 <div class="row mt-3">
     <div class="col-8 offset-2">
-        <h3>Create a New Listing</h3>
-        <form action="/listings" method="POST" novalidate class="needs-validation" enctype="multipart/form-data">
-<div class="row mt-3">
-    <div class="col-8 offset-2">
         <% if (error) { %>
             <div class="alert alert-danger" role="alert">
                 <%= error %>
             </div>
         <% } %>
         <h3>Create a New Listing</h3>
-        
+        <form action="/listings" method="POST" novalidate class="needs-validation" enctype="multipart/form-data">
+            <input type="hidden" name="debug" value="true">
+            
             <div class="mb-3">
                 <label for="title" class="form-label">Title</label>
                 <input 
@@ -45,6 +43,7 @@
                     Description looks good!
                 </div>
             </div>
+
             <div class="mb-3">
                 <label for="image" class="form-label">Upload Listing Image</label>
                 <input 
@@ -54,6 +53,9 @@
                     class="form-control"
                     required
                 >
+                <div class="invalid-feedback">
+                    Please upload an image
+                </div>
             </div>
 
             <div class="row">
@@ -71,7 +73,7 @@
                         Price is required
                     </div>
                     <div class="valid-feedback">
-                        price looks good!
+                        Price looks good!
                     </div>
                 </div>
 
@@ -116,19 +118,3 @@
         </form>
     </div>
 </div>
-
-<script>
-(() => {
-    'use strict';
-    const forms = document.querySelectorAll('.needs-validation');
-    Array.from(forms).forEach(form => {
-        form.addEventListener('submit', (event) => {
-            if (!form.checkValidity()) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-            form.classList.add('was-validated');
-        });
-    });
-})();
-</script>
