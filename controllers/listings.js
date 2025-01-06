@@ -17,7 +17,12 @@ module.exports.renderNewForm = (req, res) => {
 // createListing function 
 module.exports.createListing = async (req, res, next) => {
     try {
+        // Log the form data received
+        console.log("Request body:", req.body); 
+        
         const listing = new Listing(req.body.listing);
+
+        // Handle file upload if it exists
         if (req.file) {
             listing.image = {
                 url: req.file.path,
@@ -25,7 +30,7 @@ module.exports.createListing = async (req, res, next) => {
             };
         }
 
-        // Optional: Add geolocation if location is provided
+        // Optional: Geocode location
         if (req.body.listing.location) {
             const geoData = await geocodingClient
                 .forwardGeocode({
@@ -36,16 +41,21 @@ module.exports.createListing = async (req, res, next) => {
             listing.geometry = geoData.body.features[0].geometry;
         }
 
-        listing.owner = req.user._id; // Ensure logged-in user is set as the owner
+        // Set the owner of the listing to the logged-in user
+        listing.owner = req.user._id;
+
+        // Save the listing to the database
         await listing.save();
+
         req.flash("success", "Successfully created a new listing!");
         res.redirect(`/listings/${listing._id}`);
     } catch (error) {
-        console.error(error); // Logs the error to the console
+        console.error(error); // Log any errors
         req.flash("error", "Unable to create the listing. Please try again.");
         res.redirect("/listings/new");
     }
 };
+
 
 
 // Show details of a specific listing
