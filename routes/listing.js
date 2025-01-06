@@ -10,11 +10,17 @@ const multer  = require('multer');
 const {storage} = require("../cloudConfig.js");
 const upload = multer({storage});
 
+const wrapAsync = (fn) => {
+    return function (req, res, next) {
+        fn(req, res, next).catch(next);
+    };
+};
+
 router.route("/")
     .get(wrapAsync(listingController.index))
     .post(
         isLoggedIn, 
-        upload.single("image"),  // Changed from "listing[image]" to "image"
+        upload.single("image"),
         validateListing, 
         wrapAsync(listingController.createListing)
     );
