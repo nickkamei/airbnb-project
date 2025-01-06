@@ -32,13 +32,13 @@ module.exports.isOwner = async (req, res, next) => {
 
 //validatelisting function
 module.exports.validateListing = (req, res, next) => {
-    let {error} = listingSchema.validate(req.body);
+    let { error } = listingSchema.validate(req.body);
     if (error) {
         let errMsg = error.details.map((el) => el.message).join(",");
-        throw new ExpressError(400, errMsg);
-    } else {
-        next();
+        req.flash("error", errMsg);
+        return res.redirect("/listings/new");
     }
+    next();
 };
 
 module.exports.validateReview = (req, res, next) => {
