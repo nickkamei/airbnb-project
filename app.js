@@ -136,3 +136,11 @@ app.use((err, req, res, next) => {
 mongoose.connection.on('error', err => {
     console.log('MongoDB connection error:', err);
 });
+
+
+console.log('Registered routes:', app._router.stack
+    .filter(r => r.route)
+    .map(r => ({
+        path: r.route.path,
+        method: Object.keys(r.route.methods)
+    })));
