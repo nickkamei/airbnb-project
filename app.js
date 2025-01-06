@@ -1,5 +1,5 @@
-if(process.env.NODE_ENV != "production"){
-    require('dotenv').config();
+if (process.env.NODE_ENV !== "production") {
+    require("dotenv").config();
 }
 
 const express = require("express");
@@ -9,53 +9,42 @@ const dbUrl = process.env.ATLASDB_URL;
 const path = require("path");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
-const ExpressError = require("./utils/ExpressError.js");
+const ExpressError = require("./utils/ExpressError");
 const session = require("express-session");
-const MongoStore = require('connect-mongo');
+const MongoStore = require("connect-mongo");
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models/user");
 
+const listingRouter = require("./routes/listing");
+const reviewRouter = require("./routes/review");
+const userRouter = require("./routes/user");
 
-const listingRouter = require("./routes/listing.js");
-const reviewRouter = require("./routes/review.js");
-const userRouter = require("./routes/user.js");
+mongoose.connect(dbUrl)
+    .then(() => console.log("Connected to MongoDB"))
+    .catch((err) => console.log("MongoDB connection error:", err));
 
-
-
-main().then(() => {
-    console.log("connected to DB");
-}).catch((err) =>{
-    console.log(err);
-})
-
-async function main() {
-    await mongoose.connect(dbUrl);
-}
-
-app.set("view engine", 'ejs');
+app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
-app.engine('ejs', ejsMate);
+app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "public")));
 
 const store = MongoStore.create({
     mongoUrl: dbUrl,
-    crypto: {
-        secret: process.env.SECRET,
-    },
-    touchAfter: 24 * 3600,
+    crypto: { secret: process.env.SECRET },
+    touchAfter: 24 * 3600, // Save session once in 24 hours
 });
 
-store.on("error", () => {
-    console.log("error in mongo session store", error);
-})
+store.on("error", (error) => {
+    console.log("Mongo session store error:", error);
+});
 
 const sessionOptions = {
     store,
-    secret: process.env.SECRET,
+    secret: process.env.SECRET || "fallbacksecret",
     resave: false,
     saveUninitialized: true,
     cookie: {
@@ -64,11 +53,6 @@ const sessionOptions = {
         httpOnly: true,
     },
 };
-
-// app.get("/", (req, res) => {
-//     res.send("Hi, i am root");
-// });
-
 
 app.use(session(sessionOptions));
 app.use(flash());
@@ -87,60 +71,20 @@ app.use((req, res, next) => {
     next();
 });
 
-// app.get("/demouser", async (req, res) => {
-//     let fakeUser = new User({
-//         email: "student@gmail.com",
-//         username: "delta-student"
-//     });
-//     let registerUser = await User.register(fakeUser, "helloworld");
-//     res.send(registerUser);
-// })
-
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
 app.use("/", userRouter);
 
-
-app.all("*", (req, res, next) =>{
-    next(new ExpressError(404, "page not found!"));
+app.all("*", (req, res, next) => {
+    next(new ExpressError("Page not found", 404));
 });
 
 app.use((err, req, res, next) => {
-    let {statusCode = 500, message="something went wrong"} = err;
-    res.status(statusCode).render("error.ejs", {err});
-    // res.status(statusCode).send(message);
-});
-
-app.listen(8080, ()=>{
-    console.log("server is listening to port 8080");
-});
-
-app.use((err, req, res, next) => {
+    const { statusCode = 500, message = "Something went wrong" } = err;
     console.error("ERROR:", err);
-    
-    // Handle Joi validation errors
-    if (err.name === "ValidationError") {
-        req.flash("error", err.message);
-        return res.redirect("/listings/new");
-    }
-    
-    // Handle Multer errors
-    if (err.name === "MulterError") {
-        req.flash("error", "Error uploading file: " + err.message);
-        return res.redirect("/listings/new");
-    }
-    
-    next(err);
+    res.status(statusCode).render("error", { err });
 });
 
-mongoose.connection.on('error', err => {
-    console.log('MongoDB connection error:', err);
+app.listen(8080, () => {
+    console.log("Server is running on port 8080");
 });
-
-
-console.log('Registered routes:', app._router.stack
-    .filter(r => r.route)
-    .map(r => ({
-        path: r.route.path,
-        method: Object.keys(r.route.methods)
-    })));
