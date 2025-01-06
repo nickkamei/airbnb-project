@@ -35,49 +35,69 @@ module.exports.showListing = async (req, res) => {
     res.render("listings/show", {listing});
 };
 
+// listings.js controller
 module.exports.createListing = async (req, res, next) => {
     try {
-        console.log("Creating listing - Request body:", req.body);
-        console.log("File upload:", req.file);
+        // Debug logging
+        console.log("Form Data Received:");
+        console.log("Body:", req.body);
+        console.log("File:", req.file);
+        console.log("User:", req.user);
 
-        // Check if file exists
+        // Validate listing data
+        const { error } = listingSchema.validate(req.body);
+        if (error) {
+            console.log("Validation Error:", error.details);
+            req.flash("error", error.details.map(err => err.message).join(", "));
+            return res.redirect("/listings/new");
+        }
+
+        // Check file upload
         if (!req.file) {
-            console.log("No file uploaded");
+            console.log("File upload missing");
             req.flash("error", "Please upload an image");
             return res.redirect("/listings/new");
         }
 
-        // Log geocoding attempt
-        console.log("Attempting geocoding for:", req.body.listing.location);
-        let response = await geocodingClient.forwardGeocode({
-            query: req.body.listing.location,
-            limit: 1
-        }).send();
+        // Geocoding
+        try {
+            console.log("Geocoding location:", req.body.listing.location);
+            const geoResponse = await geocodingClient.forwardGeocode({
+                query: req.body.listing.location,
+                limit: 1
+            }).send();
 
-        console.log("Geocoding response:", response.body);
+            if (!geoResponse.body.features?.length) {
+                req.flash("error", "Location not found. Please enter a valid location.");
+                return res.redirect("/listings/new");
+            }
 
-        if (!response.body.features || !response.body.features[0]) {
-            console.log("No geocoding results found");
-            req.flash("error", "Location not found");
+            // Create new listing
+            const newListing = new Listing({
+                ...req.body.listing,
+                owner: req.user._id,
+                image: {
+                    url: req.file.path,
+                    filename: req.file.filename
+                },
+                geometry: geoResponse.body.features[0].geometry
+            });
+
+            console.log("Saving listing:", newListing);
+            await newListing.save();
+
+            req.flash("success", "Successfully created new listing!");
+            return res.redirect("/listings");
+
+        } catch (geoError) {
+            console.error("Geocoding Error:", geoError);
+            req.flash("error", "Error processing location. Please try again.");
             return res.redirect("/listings/new");
         }
 
-        let url = req.file.path;
-        let filename = req.file.filename;
-        const newListing = new Listing(req.body.listing);
-        newListing.owner = req.user._id;
-        newListing.image = {url, filename};
-        newListing.geometry = response.body.features[0].geometry;
-        
-        console.log("About to save listing:", newListing);
-        let savedListing = await newListing.save();
-        console.log("Listing saved:", savedListing);
-
-        req.flash("success", "New Listing Created!");
-        res.redirect("/listings");
-    } catch (error) {
-        console.error("Error creating listing:", error);
-        req.flash("error", error.message || "Error creating listing");
+    } catch (err) {
+        console.error("Create Listing Error:", err);
+        req.flash("error", "Error creating listing: " + err.message);
         return res.redirect("/listings/new");
     }
 };
