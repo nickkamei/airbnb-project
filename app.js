@@ -7,6 +7,8 @@ const flash = require("connect-flash");
 const ExpressError = require("./utils/ExpressError");
 const listingsRoutes = require("./routes/listings");
 const mongoose = require("mongoose");
+const listings = require('./routes/listings');
+
 require("dotenv").config();
 
 // Database connection
